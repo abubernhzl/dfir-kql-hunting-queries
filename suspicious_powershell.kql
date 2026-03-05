@@ -1,0 +1,25 @@
+// ================================================================
+// Detection Name: Suspicious PowerShell Execution
+//
+// Description:
+// Detects potentially malicious PowerShell commands used for
+// downloading payloads or executing obfuscated commands.
+//
+// MITRE ATT&CK:
+// T1059.001 - Command and Scripting Interpreter: PowerShell
+//
+// Data Source:
+// DeviceProcessEvents
+//
+// What to look for:
+// - Encoded commands
+// - DownloadString / Invoke-WebRequest
+// - PowerShell spawned by unusual processes
+// ================================================================
+
+DeviceProcessEvents
+| where Timestamp >= ago(7d)
+| where FileName =~ "powershell.exe"
+| where ProcessCommandLine contains_any ("Invoke-WebRequest","DownloadString","EncodedCommand","IEX")
+| project Timestamp, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName
+| order by Timestamp desc

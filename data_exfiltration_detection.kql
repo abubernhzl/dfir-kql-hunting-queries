@@ -1,0 +1,24 @@
+// ================================================================
+// Detection Name: Potential Data Exfiltration
+//
+// Description:
+// Detects high numbers of outbound network connections.
+//
+// MITRE ATT&CK:
+// T1041 - Exfiltration Over Command and Control Channel
+//
+// Data Source:
+// DeviceNetworkEvents
+//
+// What to look for:
+// - Processes with unusually high connection counts
+// - Unknown processes communicating externally
+// ================================================================
+
+let TimeRange = 4d;
+
+DeviceNetworkEvents
+| where Timestamp >= ago(TimeRange)
+| where RemoteIPType == "Public"
+| summarize TotalConnections=count() by DeviceName, InitiatingProcessFileName
+| order by TotalConnections desc

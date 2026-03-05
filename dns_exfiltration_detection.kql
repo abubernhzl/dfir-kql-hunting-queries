@@ -1,0 +1,22 @@
+// ================================================================
+// Detection Name: Possible DNS Exfiltration
+//
+// Description:
+// Detects domains with high DNS query counts.
+//
+// MITRE ATT&CK:
+// T1071.004 - Application Layer Protocol: DNS
+//
+// Data Source:
+// DeviceNetworkEvents
+//
+// What to look for:
+// - High DNS query volumes
+// - Suspicious or random-looking domains
+// ================================================================
+
+DeviceNetworkEvents
+| where Timestamp >= ago(7d)
+| where RemoteUrl contains "."
+| summarize QueryCount=count() by RemoteUrl
+| order by QueryCount desc

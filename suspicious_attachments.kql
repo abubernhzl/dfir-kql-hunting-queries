@@ -1,0 +1,22 @@
+// ================================================================
+// Detection Name: Suspicious Email Attachments
+//
+// Description:
+// Identifies attachments that are commonly used in malware delivery.
+//
+// MITRE ATT&CK:
+// T1566.001 - Phishing Attachment
+//
+// Data Source:
+// EmailAttachmentInfo
+//
+// What to look for:
+// - Executable attachments
+// - Script files sent via email
+// ================================================================
+
+EmailAttachmentInfo
+| where TimeGenerated >= ago(30d)
+| where FileType in ("exe","js","vbs","ps1","bat")
+| project TimeGenerated, SenderFromAddress, RecipientEmailAddress, FileName, FileType
+| order by TimeGenerated desc

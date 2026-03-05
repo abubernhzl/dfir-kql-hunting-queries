@@ -1,0 +1,24 @@
+// ================================================================
+// Detection Name: Suspicious Outbound Network Connections
+//
+// Description:
+// Detects outbound internet connections from non-browser processes.
+//
+// MITRE ATT&CK:
+// T1071 - Application Layer Protocol
+// T1041 - Exfiltration Over C2 Channel
+//
+// Data Source:
+// DeviceNetworkEvents
+//
+// What to look for:
+// - Unknown processes making external connections
+// - Repeated connections to the same external IP
+// ================================================================
+
+DeviceNetworkEvents
+| where Timestamp >= ago(7d)
+| where RemoteIPType == "Public"
+| where InitiatingProcessFileName !in ("chrome.exe","msedge.exe","firefox.exe")
+| project Timestamp, DeviceName, InitiatingProcessFileName, RemoteIP, RemotePort
+| order by Timestamp desc

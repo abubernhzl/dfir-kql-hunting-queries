@@ -1,0 +1,22 @@
+// ================================================================
+// Detection Name: Risky Sign-ins
+//
+// Description:
+// Identifies sign-in events flagged with risk indicators.
+//
+// MITRE ATT&CK:
+// T1078 - Valid Accounts
+//
+// Data Source:
+// SigninLogs
+//
+// What to look for:
+// - High risk sign-in events
+// - Suspicious geolocations
+// ================================================================
+
+SigninLogs
+| where TimeGenerated >= ago(7d)
+| where RiskLevelDuringSignIn != "none"
+| project TimeGenerated, UserPrincipalName, IPAddress, Location, RiskLevelDuringSignIn, AppDisplayName
+| order by TimeGenerated desc

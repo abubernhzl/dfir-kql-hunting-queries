@@ -1,0 +1,22 @@
+// ================================================================
+// Detection Name: Suspicious Phishing Email Indicators
+//
+// Description:
+// Detects emails containing common phishing-related keywords.
+//
+// MITRE ATT&CK:
+// T1566 - Phishing
+//
+// Data Source:
+// EmailEvents
+//
+// What to look for:
+// - Emails with financial or urgent language
+// - Unexpected senders
+// ================================================================
+
+EmailEvents
+| where TimeGenerated >= ago(30d)
+| where Subject contains_any ("invoice","payment","urgent","verify","account")
+| project TimeGenerated, SenderFromAddress, RecipientEmailAddress, Subject, UrlCount, AttachmentCount
+| order by TimeGenerated desc
