@@ -17,9 +17,30 @@
 // - PowerShell spawned by unusual processes
 // ================================================================
 
+// ==== INCIDENT SCOPE (EDIT) ====
+let lookback = 7d;                    // 48h is a good start; widen if needed
+let Device    = "DEVICE NAME"; 
 DeviceProcessEvents
-| where Timestamp >= ago(7d)
+| where isempty(Device) or DeviceName contains Device
+| where Timestamp > ago(lookback)
 | where FileName =~ "powershell.exe"
 | where ProcessCommandLine contains_any ("Invoke-WebRequest","DownloadString","EncodedCommand","IEX")
 | project Timestamp, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName
 | order by Timestamp desc
+
+
+
+//DEVICE NETWORK EVENTS (OPTIONAL)
+
+// ==== INCIDENT SCOPE (EDIT) ====
+let lookback = 7d;                    // 48h is a good start; widen if needed
+let Device    = "DEVICE NAME";         // optional; set "" to include all Windows devices
+// Payload download tools (PowerShell/curl/bitsadmin/certutil/mshta/rundll32)
+DeviceNetworkEvents
+| where isempty(Device) or DeviceName contains Device
+| where Timestamp > ago(lookback)
+| where InitiatingProcessFileName in~ ("powershell.exe","curl.exe","bitsadmin.exe","certutil.exe","mshta.exe","rundll32.exe")
+   or InitiatingProcessCommandLine has_any ("Invoke-WebRequest","DownloadString","WebClient","http","https")
+| project Timestamp, DeviceName,
+          Parent=InitiatingProcessFileName, ParentCmd=InitiatingProcessCommandLine,
+          RemoteUrl, RemoteIP, RemotePort
